@@ -1,0 +1,17 @@
+x = 128
+y = 192
+width = 16
+height = 16
+
+pseudocode
+if the paddle collides with the powerup, the powerup dissappears and two extra balls are spawned. NOT IMPLEMENTED
+
+have the three balls available until victory screen NOT IMPLEMENTED
+optional functionality: spawn the powerup with a dy component, and have it bounce off walls NOT IMPLEMENTED
+
+
+    
+
+
+
+find a way to give balls 2 and 3 random velocities when they are instantiated NOT IMPLEMENTED
