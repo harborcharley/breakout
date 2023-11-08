@@ -68,9 +68,7 @@ function PlayState:update(dt)
     -- update paddle and ball positions based on velocity
 
     self.paddle:update(dt)
-
     self.ball:update(dt)
-
 
     -- if powerup is initialized, update position and check for collisions with paddle
     
@@ -86,6 +84,7 @@ function PlayState:update(dt)
     if self.powerup then
         if self.powerup.inplay and self.powerup.y > VIRTUAL_HEIGHT then
             self.powerup.inplay = false
+            self.powerup = false
             gSounds['hurt']:play()
             powerupTimer = 0
         end
@@ -249,6 +248,9 @@ function PlayState:render()
 
     self.paddle:render()
     self.ball:render()
+    if self.powerup and self.powerup.inplay then
+        self.powerup:render()
+    end
 
     renderScore(self.score)
     renderHealth(self.health)
