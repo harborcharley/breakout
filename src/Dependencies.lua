@@ -35,6 +35,11 @@ require 'src/StateMachine'
 -- of differing sizes for paddles, balls, bricks, etc.
 require 'src/Util'
 
+--  a Class to create a powerup which spawns randomly which, if caught by the player, adds two
+--  new Ball objects which behave identically to the original should spawn and
+-- remain in play until the player wins the level
+require 'src/Powerup'
+
 -- each of the individual states our game can be in at once; each state has
 -- its own update and render methods that can be called by our state machine
 -- each frame, to avoid bulky code in main.lua
