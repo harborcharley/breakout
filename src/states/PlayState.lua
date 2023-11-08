@@ -34,9 +34,17 @@ function PlayState:enter(params)
     -- give ball random starting velocity
     self.ball.dx = math.random(-200, 200)
     self.ball.dy = math.random(-50, -60)
+
+
+    -- timer for random initiation of powerup
+    powerupTimer = 0
+    randomTime = math.random(5, 8)
+
+
 end
 
 function PlayState:update(dt)
+-- Pause functionality
     if self.paused then
         if love.keyboard.wasPressed('space') then
             self.paused = false
@@ -50,10 +58,40 @@ function PlayState:update(dt)
         return
     end
 
-    -- update positions based on velocity
+    
+    --generate powerup at random time
+    powerupTimer = powerupTimer + dt
+    if math.modf(powerupTimer) == randomTime and not self.powerup then
+        self.powerup = Powerup()
+    end
+
+    -- update paddle and ball positions based on velocity
+
     self.paddle:update(dt)
+
     self.ball:update(dt)
 
+
+    -- if powerup is initialized, update position and check for collisions with paddle
+    
+    if self.powerup then
+        if self.powerup.inplay then
+            self.powerup:update(dt)
+            self.powerup:collides(self.paddle)
+        end
+    end
+
+    
+    -- if powerup is inplay, detect passing through screen bottom
+    if self.powerup then
+        if self.powerup.inplay and self.powerup.y > VIRTUAL_HEIGHT then
+            self.powerup.inplay = false
+            gSounds['hurt']:play()
+            powerupTimer = 0
+        end
+    end
+
+    -- detect collision of ball with paddle
     if self.ball:collides(self.paddle) then
         -- raise ball above paddle in case it goes below it, then reverse dy
         self.ball.y = self.paddle.y - 8
@@ -192,6 +230,7 @@ function PlayState:update(dt)
         brick:update(dt)
     end
 
+-- escape key quit functionality
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
@@ -214,6 +253,10 @@ function PlayState:render()
     renderScore(self.score)
     renderHealth(self.health)
 
+--print powerupTimer
+    love.graphics.setFont(gFonts['medium'])
+    love.graphics.printf(tostring(math.modf(powerupTimer)), 50, 100, VIRTUAL_WIDTH, 'left')
+    love.graphics.printf(tostring(randomTime), 50, 150, VIRTUAL_WIDTH, 'left')
     -- pause text, if paused
     if self.paused then
         love.graphics.setFont(gFonts['large'])
