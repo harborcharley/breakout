@@ -134,6 +134,54 @@ function PlayState:update(dt)
         gSounds['paddle-hit']:play()
     end
 
+    -- detect collision of ball_2 with paddle
+    if self.ball_2 then
+        if self.ball_2:collides(self.paddle) then
+            -- raise ball_1 above paddle in case it goes below it, then reverse dy
+            self.ball_2.y = self.paddle.y - 8
+            self.ball_2.dy = -self.ball_1.dy
+
+            --
+            -- tweak angle of bounce based on where it hits the paddle
+            --
+
+            -- if we hit the paddle on its left side while moving left...
+            if self.ball_2.x < self.paddle.x + (self.paddle.width / 2) and self.paddle.dx < 0 then
+                self.ball_2.dx = -50 + -(8 * (self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
+
+                -- else if we hit the paddle on its right side while moving right...
+            elseif self.ball_2.x > self.paddle.x + (self.paddle.width / 2) and self.paddle.dx > 0 then
+                self.ball_2.dx = 50 + (8 * math.abs(self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
+            end
+
+            gSounds['paddle-hit']:play()
+        end
+    end
+
+    -- detect collision of ball_3 with paddle
+    if self.ball_3 then
+        if self.ball_3:collides(self.paddle) then
+            -- raise ball_1 above paddle in case it goes below it, then reverse dy
+            self.ball_3.y = self.paddle.y - 8
+            self.ball_3.dy = -self.ball_1.dy
+
+            --
+            -- tweak angle of bounce based on where it hits the paddle
+            --
+
+            -- if we hit the paddle on its left side while moving left...
+            if self.ball_3.x < self.paddle.x + (self.paddle.width / 2) and self.paddle.dx < 0 then
+                self.ball_3.dx = -50 + -(8 * (self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
+
+                -- else if we hit the paddle on its right side while moving right...
+            elseif self.ball_3.x > self.paddle.x + (self.paddle.width / 2) and self.paddle.dx > 0 then
+                self.ball_3.dx = 50 + (8 * math.abs(self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
+            end
+
+            gSounds['paddle-hit']:play()
+        end
+    end
+
     -- detect collision across all bricks with the ball_1
     for k, brick in pairs(self.bricks) do
 
