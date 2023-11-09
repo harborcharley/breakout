@@ -32,13 +32,18 @@ function PlayState:enter(params)
     self.recoverPoints = 5000
 
     -- give ball_1 random starting velocity
-    self.ball_1.dx = math.random(-200, 200)
+    self.ball_1.dx = math.random(-100, 100)
     self.ball_1.dy = math.random(-50, -60)
 
 
     -- timer for random initiation of powerup
     powerupTimer = 0
     randomTime = math.random(5, 8)
+
+    --create ball table
+    self.balltable = {}
+    self.balltable[1] = self.ball_1
+    self.balltable[1].inplay = true
 
 
 end
@@ -68,13 +73,20 @@ function PlayState:update(dt)
     -- update paddle and ball(s) positions based on velocity
 
     self.paddle:update(dt)
-    self.ball_1:update(dt)
+    for i = 1, 3, 1 do
+        if self.balltable[i] then
+            if self.balltable[i].inplay then
+                self.balltable[i]:update(dt)
+            end
+        end
+    end
+    --[[self.balltable[1]:update(dt)
     if self.ball_2 then
         self.ball_2:update(dt)
     end
     if self.ball_3 then
         self.ball_3:update(dt)
-    end
+    end]]
 
     -- if powerup is initialized, update position and check for collisions with paddle
     
@@ -86,15 +98,20 @@ function PlayState:update(dt)
                 self.ball_2.x = self.paddle.x + (self.paddle.width / 2) - 4
                 self.ball_2.y = self.paddle.y - 8
                 self.ball_2.skin = math.random(7)
-                self.ball_2.dx = math.random(-200, 200)
+                self.ball_2.dx = math.random(-100, 100)
                 self.ball_2.dy = math.random(-50, -60)
+                self.ball_2.inplay = true
 
                 self.ball_3 = Ball()
                 self.ball_3.x = self.paddle.x + (self.paddle.width / 2) - 4
                 self.ball_3.y = self.paddle.y - 8
                 self.ball_3.skin = math.random(7)
-                self.ball_3.dx = math.random(-200, 200)
+                self.ball_3.dx = math.random(-100, 100)
                 self.ball_3.dy = math.random(-50, -60)
+                self.ball_3.inplay = true
+
+                self.balltable[2] = self.ball_2
+                self.balltable[3] = self.ball_3
             end
         end
     end
@@ -113,7 +130,7 @@ function PlayState:update(dt)
     end
 
     -- detect collision of ball_1 with paddle
-    if self.ball_1:collides(self.paddle) then
+    --[[if self.ball_1:collides(self.paddle) then
         -- raise ball_1 above paddle in case it goes below it, then reverse dy
         self.ball_1.y = self.paddle.y - 8
         self.ball_1.dy = -self.ball_1.dy
@@ -137,7 +154,7 @@ function PlayState:update(dt)
     -- detect collision of ball_2 with paddle
     if self.ball_2 then
         if self.ball_2:collides(self.paddle) then
-            -- raise ball_1 above paddle in case it goes below it, then reverse dy
+            -- raise ball_2 above paddle in case it goes below it, then reverse dy
             self.ball_2.y = self.paddle.y - 8
             self.ball_2.dy = -self.ball_1.dy
 
@@ -180,7 +197,34 @@ function PlayState:update(dt)
 
             gSounds['paddle-hit']:play()
         end
+    end]]
+
+    for i = 1, 3, 1 do
+        if self.balltable[i] then                   
+            if self.balltable[i]:collides(self.paddle) then
+                -- raise ball_1 above paddle in case it goes below it, then reverse dy
+                self.balltable[i].y = self.paddle.y - 8
+                self.balltable[i].dy = -self.balltable[i].dy
+                --
+                -- tweak angle of bounce based on where it hits the paddle
+                --
+                -- if we hit the paddle on its left side while moving left...
+                if self.balltable[i].x < self.paddle.x + (self.paddle.width / 2) and self.paddle.dx < 0 then
+                    self.balltable[i].dx = -50 + -(8 * (self.paddle.x + self.paddle.width / 2 - self.balltable[i].x))
+
+                -- else if we hit the paddle on its right side while moving right...
+                elseif self.balltable[i].x > self.paddle.x + (self.paddle.width / 2) and self.paddle.dx > 0 then
+                    self.balltable[i].dx = 50 +
+                    (8 * math.abs(self.paddle.x + self.paddle.width / 2 - self.balltable[i].x))
+                end
+
+                gSounds['paddle-hit']:play()
+            end
+        end
     end
+
+
+
 
     -- detect collision across all bricks with the ball_1
     for k, brick in pairs(self.bricks) do
@@ -317,17 +361,24 @@ function PlayState:render()
     end
 
     self.paddle:render()
-    self.ball_1:render()
+    --self.balltable[1]:render()
     if self.powerup and self.powerup.inplay then
         self.powerup:render()
     end
 
-    if self.ball_2 then
+        --[[if self.ball_2 then
         self.ball_2:render()
     end
 
     if self.ball_3 then
         self.ball_3:render()
+    end]]
+    for i = 1, 3, 1 do
+        if self.balltable[i] then
+            if self.balltable[i].inplay then
+                self.balltable[i]:render()
+            end
+        end
     end
     renderScore(self.score)
     renderHealth(self.health)

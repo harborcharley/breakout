@@ -10,7 +10,7 @@ have the three balls available until victory screen NOT IMPLEMENTED
 optional functionality: spawn the powerup with a dy component, and have it bounce off walls NOT IMPLEMENTED
 
 
-    
+optional rework code to loop through balls to reduce lines of code
 
 
 
