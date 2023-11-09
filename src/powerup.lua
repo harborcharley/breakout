@@ -41,7 +41,6 @@ function Powerup:collides(target)
 
     -- if the above aren't true they overlap
     self.inplay = false
-    
     return true
 end
 
