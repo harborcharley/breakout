@@ -41,7 +41,7 @@ function PaddleSelectState:update(dt)
         end
     end
 
-    -- select paddle and move on to the serve state, passing in the selection
+    -- select paddle color and move on to the serve state, passing in the selection
     if love.keyboard.wasPressed('return') or love.keyboard.wasPressed('enter') then
         gSounds['confirm']:play()
 

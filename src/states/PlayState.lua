@@ -47,10 +47,10 @@ function PlayState:enter(params)
 
     -- variable for counting how many balls go below bounds
     outOfPlay = 0
-
-
 end
 
+-- variable to track score increase since last variable zero
+scoreTrack = 0
 function PlayState:update(dt)
 -- Pause functionality
     if self.paused then
@@ -66,7 +66,7 @@ function PlayState:update(dt)
         return
     end
 
-    
+
     --generate powerup at random time
     powerupTimer = powerupTimer + dt
     if math.modf(powerupTimer) == randomTime and not self.powerup then
@@ -83,13 +83,7 @@ function PlayState:update(dt)
             end
         end
     end
-    --[[self.balltable[1]:update(dt)
-    if self.ball_2 then
-        self.ball_2:update(dt)
-    end
-    if self.ball_3 then
-        self.ball_3:update(dt)
-    end]]
+   
 
     -- if powerup is initialized, update position and check for collisions with paddle
     
@@ -132,76 +126,10 @@ function PlayState:update(dt)
         end
     end
 
-    -- detect collision of ball_1 with paddle
-    --[[if self.ball_1:collides(self.paddle) then
-        -- raise ball_1 above paddle in case it goes below it, then reverse dy
-        self.ball_1.y = self.paddle.y - 8
-        self.ball_1.dy = -self.ball_1.dy
+ 
 
-        --
-        -- tweak angle of bounce based on where it hits the paddle
-        --
-
-        -- if we hit the paddle on its left side while moving left...
-        if self.ball_1.x < self.paddle.x + (self.paddle.width / 2) and self.paddle.dx < 0 then
-            self.ball_1.dx = -50 + -(8 * (self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
-        
-        -- else if we hit the paddle on its right side while moving right...
-        elseif self.ball_1.x > self.paddle.x + (self.paddle.width / 2) and self.paddle.dx > 0 then
-            self.ball_1.dx = 50 + (8 * math.abs(self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
-        end
-
-        gSounds['paddle-hit']:play()
-    end
-
-    -- detect collision of ball_2 with paddle
-    if self.ball_2 then
-        if self.ball_2:collides(self.paddle) then
-            -- raise ball_2 above paddle in case it goes below it, then reverse dy
-            self.ball_2.y = self.paddle.y - 8
-            self.ball_2.dy = -self.ball_1.dy
-
-            --
-            -- tweak angle of bounce based on where it hits the paddle
-            --
-
-            -- if we hit the paddle on its left side while moving left...
-            if self.ball_2.x < self.paddle.x + (self.paddle.width / 2) and self.paddle.dx < 0 then
-                self.ball_2.dx = -50 + -(8 * (self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
-
-                -- else if we hit the paddle on its right side while moving right...
-            elseif self.ball_2.x > self.paddle.x + (self.paddle.width / 2) and self.paddle.dx > 0 then
-                self.ball_2.dx = 50 + (8 * math.abs(self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
-            end
-
-            gSounds['paddle-hit']:play()
-        end
-    end
-
-    -- detect collision of ball_3 with paddle
-    if self.ball_3 then
-        if self.ball_3:collides(self.paddle) then
-            -- raise ball_1 above paddle in case it goes below it, then reverse dy
-            self.ball_3.y = self.paddle.y - 8
-            self.ball_3.dy = -self.ball_1.dy
-
-            --
-            -- tweak angle of bounce based on where it hits the paddle
-            --
-
-            -- if we hit the paddle on its left side while moving left...
-            if self.ball_3.x < self.paddle.x + (self.paddle.width / 2) and self.paddle.dx < 0 then
-                self.ball_3.dx = -50 + -(8 * (self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
-
-                -- else if we hit the paddle on its right side while moving right...
-            elseif self.ball_3.x > self.paddle.x + (self.paddle.width / 2) and self.paddle.dx > 0 then
-                self.ball_3.dx = 50 + (8 * math.abs(self.paddle.x + self.paddle.width / 2 - self.ball_1.x))
-            end
-
-            gSounds['paddle-hit']:play()
-        end
-    end]]
-
+    -- detect collision of ball(s) with paddle
+    
     for i = 1, 3, 1 do
         if self.balltable[i] then                   
             if self.balltable[i]:collides(self.paddle) then
@@ -226,9 +154,6 @@ function PlayState:update(dt)
         end
     end
 
-
-
-
     -- detect collision across all bricks with all ball(s)
     for i = 1, 3, 1 do
         if self.balltable[i] then
@@ -241,6 +166,16 @@ function PlayState:update(dt)
 
                         -- add to score
                         self.score = self.score + (brick.tier * 200 + brick.color * 25)
+                        -- increment scoreTrack for paddle size increase
+                        scoreTrack = scoreTrack + (brick.tier * 200 + brick.color * 25)
+
+                        if scoreTrack > 1000 then
+                            if self.paddle.size < 4 then
+                                self.paddle.size = self.paddle.size + 1
+                            end
+                            scoreTrack = 0
+        
+                        end
 
                         -- trigger the brick's hit function, which removes it from play
                         brick:hit()
@@ -324,7 +259,7 @@ function PlayState:update(dt)
             end
         end
     end
-    -- below bounds - if a ball goes below bounds it set to not in play. if all balls have gone below bounds, revert to serve state and decrease health
+    -- below bounds - if a ball goes below bounds set to not in play. if all balls have gone below bounds, revert to serve state and decrease health
 
     for i = 1, 3, 1 do
         if self.balltable[i] then
@@ -334,6 +269,20 @@ function PlayState:update(dt)
                     outOfPlay = outOfPlay + 1
                     if outOfPlay == 3 or (not self.balltable[2] and not self.balltable[3]) then
                         self.health = self.health - 1
+                        -- reduce paddle size if paddle is not small already
+                        if self.paddle.size > 1 then
+                            self.paddle.size = self.paddle.size - 1
+                        end
+                        -- if necessary, change paddle width parameter so that ball is centered on paddle in serve state
+                        if self.paddle.size == 1 then
+                            self.paddle.width = 32
+                        elseif self.paddle.size == 2 then
+                            self.paddle.width = 64
+                        elseif self.paddle.size == 3 then
+                            self.paddle.width = 96
+                        else
+                            self.paddle.width = 128
+                        end
                         gSounds['hurt']:play()
                         if self.health == 0 then
                             gStateMachine:change('game-over', {
@@ -363,7 +312,7 @@ function PlayState:update(dt)
         brick:update(dt)
     end
 
--- escape key quit functionality
+    -- escape key quit functionality
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
